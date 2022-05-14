@@ -1,0 +1,109 @@
+#pragma version 3
+int 0
+txn ApplicationID
+==
+bnz creation
+
+creation:
+byte "Creator"
+txn Sender
+app_global_put
+byte "Price"
+gtxna 1 ApplicationArgs 0
+btoi
+app_global_put
+byte "Percent"
+gtxna 1 ApplicationArgs 1
+btoi
+app_global_put
+global GroupSize
+int 2
+>=
+gtxn 0 TypeEnum
+int acfg
+==
+&&
+gtxn 0 ConfigAssetDefaultFrozen
+int 1
+==
+&&
+return
+
+int UpdateApplication
+txn OnCompletion
+==
+bnz updateApp
+
+updateApp:
+byte "Creator"
+app_global_get
+txn Sender
+==
+return
+
+int DeleteApplication
+txn OnCompletion
+==
+bnz DeleteApp
+
+DeleteApp:
+byte "Creator"
+app_global_get
+txn Sender
+==
+return
+
+
+byte "Creator"
+app_global_get
+gtxn 0 AssetSender
+==
+bnz txSentFromCreator
+
+txSentFromCreator:
+global GroupSize
+int 3
+==
+byte "Price"
+app_global_get
+gtxn 1 Amount
+==
+&&
+gtxn 0 AssetAmount
+int 1 
+==
+&&
+byte "Creator"
+app_global_get
+gtxn 0 AssetSender
+==
+&&
+gtxn 1 Receiver
+gtxn 0 AssetSender
+==
+&&
+return
+
+
+global GroupSize
+int 4
+==
+byte "Creator"
+app_global_get
+gtxn 0 Receiver
+==
+&&
+gtxn 0 Amount
+int 100
+*
+store 10
+gtxn 3 Amount
+store 11
+load 10
+load 11
+/
+byte "Percent"
+app_global_get
+==
+&&
+return
